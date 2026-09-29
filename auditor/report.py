@@ -33,7 +33,11 @@ def summarize(findings: list[dict[str, Any]]) -> dict[str, int]:
     counts = Counter()
 
     for finding in findings:
-        severity = finding.get("severity", "info").lower()
+        severity = finding.get(
+            "severity",
+            "info",
+        ).lower()
+
         counts[severity] += 1
 
     return {
@@ -45,7 +49,9 @@ def summarize(findings: list[dict[str, Any]]) -> dict[str, int]:
     }
 
 
-def build_report(results: list[dict[str, Any]]) -> dict[str, Any]:
+def build_report(
+    results: list[dict[str, Any]],
+) -> dict[str, Any]:
     findings = flatten_findings(results)
 
     findings.sort(
@@ -58,7 +64,9 @@ def build_report(results: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "tool": "Linux Security Auditor",
         "version": "1.0.0",
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
         "summary": summarize(findings),
         "findings": findings,
     }
@@ -66,12 +74,21 @@ def build_report(results: list[dict[str, Any]]) -> dict[str, Any]:
 
 def save_json_report(
     report: dict[str, Any],
-    path: str = "security-report.json",
+    path: str = "reports/security-report.json",
 ) -> Path:
     output = Path(path)
 
+    output.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
     output.write_text(
-        json.dumps(report, indent=2, default=str),
+        json.dumps(
+            report,
+            indent=2,
+            default=str,
+        ),
         encoding="utf-8",
     )
 
@@ -97,9 +114,20 @@ def print_report(report: dict[str, Any]) -> None:
     print("FINDINGS")
 
     for finding in report["findings"]:
-        status = finding.get("status", "INFO")
-        severity = finding.get("severity", "info").upper()
-        message = finding.get("message", "")
+        status = finding.get(
+            "status",
+            "INFO",
+        )
+
+        severity = finding.get(
+            "severity",
+            "info",
+        ).upper()
+
+        message = finding.get(
+            "message",
+            "",
+        )
 
         print(
             f"  [{status:<4}] "
@@ -109,4 +137,7 @@ def print_report(report: dict[str, Any]) -> None:
         )
 
     print()
-    print(f"Generated: {report['generated_at']}")
+    print(
+        f"Generated: "
+        f"{report['generated_at']}"
+    )
